@@ -86,6 +86,14 @@ Backtested over empirical generation profiles and market data from the German Fe
 ---
 
 📚 Citation
+@article{refaei2026stochastic,
+  title={Stochastic MILP Optimization for Co-Located PV-BESS Assets: Managing Imbalance Tail Risks via CVaR and Piecewise Degradation in the German Power Market},
+  author={Refaei, Mohammadreza},
+  journal={SSRN Electronic Journal},
+  year={2026},
+  doi={10.2139/ssrn.7345918},
+  url={https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918}
+}
 👤 Author Contact
 Mohammadreza (Max) Refaei
 
@@ -94,9 +102,3 @@ Institution: SRH Berlin University of Applied Sciences
 ORCID: 0009-0007-7867-0599
 
 Email: maxrefaei@proton.me
-  author={Refaei, Mohammadreza},
-  journal={SSRN Electronic Journal},
-  year={2026},
-  doi={10.2139/ssrn.7345918},
-  url={https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918}
-}
