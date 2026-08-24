@@ -94,5 +94,5 @@ Backtested over empirical generation profiles and market data from the German Fe
   journal={SSRN Electronic Journal},
   year={2026},
   doi={10.2139/ssrn.7345918},
-  url={[https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918)}
+  url={https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918}
 }
