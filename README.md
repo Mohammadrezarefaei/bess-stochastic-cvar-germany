@@ -1,34 +1,40 @@
-# Stochastic MILP Optimization for Co-Located PV-BESS in the German Power Market
+# Stochastic MILP Optimization for Co-Located PV-BESS Assets
 
-📄 **Technical Report & Preprint:** [Download Full Paper (PDF)](./paper_ssrn_clean.pdf)
+[![SSRN Working Paper](https://img.shields.io/badge/SSRN-Abstract%207345918-blue.svg)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918)
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0007--7867--0599-green.svg)](https://orcid.org/0009-0007-7867-0599)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
+[![Solver: HiGHS / CBC](https://img.shields.io/badge/solver-HiGHS%20%7C%20CBC-orange.svg)](https://highs.dev/)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Optimization](https://img.shields.io/badge/Pyomo-HiGHS_Solver-green.svg)](https://pyomo.readthedocs.io/)
-## 🔬 Methodology & Mathematical Formulation
+A production-grade, two-stage Stochastic Mixed-Integer Linear Programming (MILP) framework for day-ahead nomination and real-time dispatch of co-located Solar Photovoltaic (PV) and Battery Energy Storage Systems (BESS) in the German power market (reBAP balancing mechanism).
 
-The dispatch optimization coordinates binding Day-Ahead market commitments ($P_t^{\text{DA}}$) with stochastic real-time balancing settlement ($P_{t,s}^{\text{imb}}$) and non-linear battery degradation.
+---
 
-### 1. Objective Function
-$$\max \quad (1 - \beta) \cdot \mathbb{E}[\text{Profit}] + \beta \cdot \text{CVaR}_\alpha$$
+## 📄 Technical Working Paper
 
-Where expected scenario profit and tail-risk metrics are defined as:
-$$\text{Profit}_s = \sum_{t=1}^T \left[ \lambda_t^{\text{DA}} P_t^{\text{DA}} \Delta t + \lambda_{t,s}^{\text{imb}} P_{t,s}^{\text{imb}} \Delta t - \sum_{k=1}^K C_k^{\text{deg}} e_{t,k}^{\text{dis}} \right]$$
+The methodology, mathematical formulation, and empirical benchmarks are documented in the accompanying working paper:
 
-$$\text{CVaR}_\alpha = \zeta - \frac{1}{1 - \alpha} \sum_{s=1}^S \pi_s z_s$$
-## 📊 Empirical Results (German SMARD Market Data)
+> **Refaei, M.** (2026). *Stochastic MILP Optimization for Co-Located PV-BESS Assets: Managing Imbalance Tail Risks via CVaR and Piecewise Degradation in the German Power Market*. SSRN Working Paper Series, Abstract ID: [7345918](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918).
 
-![Optimization Results](./bess_simulation_chart.png)
+### Key Features
+* **Two-Stage Stochastic MILP Formulation:** First-stage day-ahead schedule commitment; second-stage scenario-based real-time re-dispatch under renewable generation and price uncertainties.
+* **Tail-Risk Hedging via CVaR:** Integrates Conditional Value-at-Risk ($\text{CVaR}_\alpha$, $\alpha = 0.95$) into the objective function to constrain adverse financial exposure from extreme imbalance settlement prices (`reBAP`).
+* **Nonlinear Cell Degradation Approximation:** Incorporates piecewise linear Depth-of-Discharge (DoD) degradation costs constrained by manufacturer Equivalent Full Cycle (EFC) warranty boundaries.
+* **Empirical Validation:** Backtested using real-world open data from the German Federal Network Agency ([SMARD](https://www.smard.de/)).
 
-| Strategy Architecture | Risk Parameter ($\beta$) | Degradation Model | Performance & Warranty Outcome |
-| :--- | :--- | :--- | :--- |
-| **Strategy A: Aggressive (Risk-Neutral)** | $\beta = 0.0$ | Ignored ($C_k = 0$) | Rapid warranty burn, micro-cycling |
-| **Strategy B: Conservative P10** | $\beta = 0.0$ | Flat Penalty | Heavy solar curtailment, suppressed PnL |
-| **Strategy C: Proposed Model** | $\beta = 0.35$ | Piecewise Linear | **Optimal risk-adjusted PnL, warranty strictly preserved** |
+---
 
-### 2. Physical & Warranty Constraints
-* **Imbalance Definition:** $P_{t,s}^{\text{imb}} = (P_t^{\text{PV}} + P_t^{\text{dis}} - P_t^{\text{ch}}) - P_t^{\text{DA}}$
-* **SoC Trajectory:** $E_t^{\text{SoC}} = E_{t-1}^{\text{SoC}} + (\eta_{\text{ch}} P_t^{\text{ch}} - \frac{P_t^{\text{dis}}}{\eta_{\text{dis}}}) \Delta t$
-* **Piecewise Degradation:** $P_t^{\text{dis}} \Delta t = \sum_{k=1}^K e_{t,k}^{\text{dis}}, \quad 0 \le e_{t,k}^{\text{dis}} \le \overline{E}_k$
-* **Warranty Cap:** $\sum_{t=1}^T \frac{P_t^{\text{dis}} \Delta t}{E_{\text{nom}}} \le \text{EFC}^{\max}$
-* **Tail Loss Epigraph:** $z_s \ge \zeta - \text{Profit}_s, \quad z_s \ge 0 \quad (\forall s \in \mathcal{S})$
+## 📁 Repository Structure
+
+```text
+├── data/                       # Historical SMARD generation and price series
+├── src/
+│   ├── model.py                # Pyomo Stochastic MILP optimization formulation
+│   ├── cvar.py                 # Risk metric auxiliary constraints
+│   ├── degradation.py         # Piecewise DoD & cycle tracking formulation
+│   └── pipeline.py             # Data fetching and post-processing routines
+├── notebooks/                  # Interactive benchmarks and visualization
+├── docs/                       # Working paper LaTeX sources and artifacts
+│   └── paper_ssrn_clean.pdf    # Full-text PDF preprint
+├── requirements.txt            # Python dependencies
+└── README.md
