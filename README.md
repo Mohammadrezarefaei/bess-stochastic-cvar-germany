@@ -86,40 +86,13 @@ Backtested over historical generation profiles and real price series from the Ge
 │   └── paper_ssrn_clean.pdf    # SSRN Working Paper full-text PDF
 ├── requirements.txt            # Python dependencies
 └── README.md
-🚀 Quickstart
-1. Setup Environment
-Bash
+## 🚀 Quickstart
+
+### 1. Setup Environment
+```bash
 git clone [https://github.com/Mohammadrezarefaei/bess-stochastic-cvar-germany.git](https://github.com/Mohammadrezarefaei/bess-stochastic-cvar-germany.git)
 cd bess-stochastic-cvar-germany
 pip install -r requirements.txt
-2. Execute Optimization
-Python
-from src.pipeline import run_stochastic_dispatch
-
-results = run_stochastic_dispatch(
-    pv_capacity_mw=10.0,
-    bess_capacity_mwh=20.0,
-    bess_power_mw=5.0,
-    cvar_weight=0.50,
-    alpha=0.95
-)
-
-print(f"Optimal Expected Profit: {results['expected_profit']:.2f} EUR")
-print(f"CVaR (95% Tail Risk):     {results['cvar']:.2f} EUR")
-print(f"BESS Cycling (EFC):       {results['efc_used']:.2f} Cycles")
-📚 Citation
-Code snippet
-@article{refaei2026stochastic,
-  title={Stochastic MILP Optimization for Co-Located PV-BESS Assets: Managing Imbalance Tail Risks via CVaR and Piecewise Degradation in the German Power Market},
-  author={Refaei, Mohammadreza},
-  journal={SSRN Electronic Journal},
-  year={2026},
-  doi={10.2139/ssrn.7345918},
-  url={[https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918)}
-}
-👤 Author Contact
-Mohammadreza (Max) Refaei
-
 Institution: SRH Berlin University of Applied Sciences
 
 ORCID: 0009-0007-7867-0599
