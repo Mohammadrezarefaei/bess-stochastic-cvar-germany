@@ -6,8 +6,6 @@
 [![SSRN Working Paper](https://img.shields.io/badge/SSRN-Preprint%207345918-blue.svg)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0007--7867--0599-A6CE39.svg)](https://orcid.org/0009-0007-7867-0599)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![Solver: HiGHS / CBC](https://img.shields.io/badge/Solver-HiGHS%20%7C%20CBC-orange.svg)](https://highs.dev/)
 
 **Author:** Mohammadreza (Max) Refaei  
 *SRH Berlin University of Applied Sciences • Berlin, Germany*  
@@ -21,7 +19,7 @@
 
 Co-located Solar Photovoltaic (PV) and Battery Energy Storage Systems (BESS) face acute financial exposure in deregulated wholesale power markets due to high forecast uncertainty and volatile real-time imbalance settlement mechanisms (such as the German **reBAP** single/dual-pricing framework). 
 
-This repository implements a **Two-Stage Stochastic Mixed-Integer Linear Programming (MILP)** model that optimizes day-ahead market commitments while mitigating:
+This paper proposes a **Two-Stage Stochastic Mixed-Integer Linear Programming (MILP)** model that optimizes day-ahead market commitments while mitigating:
 * **Physical Asset Degradation:** Utilizing a piecewise linear depth-of-discharge (DoD) penalty constrained by Equivalent Full Cycle (EFC) warranty ceilings.
 * **Financial Tail Risk:** Incorporating **Conditional Value-at-Risk ($\text{CVaR}_\alpha$)** at $\alpha = 0.95$ to protect cash flows against extreme imbalance settlement penalties.
 
@@ -55,8 +53,6 @@ $$z_\omega \ge 0, \quad \forall \omega \in \Omega$$
 
 $$\text{CVaR}_\alpha = \zeta - \frac{1}{1-\alpha} \sum_{\omega \in \Omega} \pi_\omega z_\omega$$
 
-Where $\mathcal{R}_\omega$ is the total realized net cash flow under scenario $\omega$.
-
 ---
 
 ### 3. Piecewise Linear Battery Degradation
@@ -71,7 +67,7 @@ $$\sum_{t=1}^T \frac{P_{t,\omega}^{\text{ch}} \eta_{\text{ch}} + P_{t,\omega}^{\
 
 ## 📊 Benchmark & Performance Metrics
 
-Backtested over historical generation profiles and real price series from the German Federal Network Agency (**SMARD / Bundesnetzagentur**):
+Backtested over empirical generation profiles and market data from the German Federal Network Agency (**SMARD / Bundesnetzagentur**):
 
 | Dispatch Strategy | Expected Daily Profit (€) | 5% Worst-Case CVaR (€) | Daily EFC Usage | Risk Reduction |
 | :--- | :---: | :---: | :---: | :---: |
@@ -82,42 +78,16 @@ Backtested over historical generation profiles and real price series from the Ge
 
 ---
 
-## 📁 Repository Structure
+## 📄 Working Paper & Full-Text
 
-```text
-├── data/                       # Historical SMARD generation and reBAP price series
-├── src/
-│   ├── model.py                # Pyomo Stochastic MILP optimization engine
-│   ├── cvar.py                 # CVaR auxiliary constraints & risk modules
-│   ├── degradation.py         # Piecewise DoD & cycle wear formulation
-│   └── pipeline.py             # Data fetching and post-processing routines
-├── docs/                       # Working paper artifacts & preprint PDF
-│   └── paper_ssrn_clean.pdf    # SSRN Working Paper full-text PDF
-├── requirements.txt            # Python dependencies
-└── README.md
-🚀 Quickstart
-1. Setup Environment
-Bash
-git clone [https://github.com/Mohammadrezarefaei/bess-stochastic-cvar-germany.git](https://github.com/Mohammadrezarefaei/bess-stochastic-cvar-germany.git)
-cd bess-stochastic-cvar-germany
-pip install -r requirements.txt
-2. Execute Optimization
-Python
-from src.pipeline import run_stochastic_dispatch
+* **SSRN Abstract:** [SSRN ID 7345918](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918)
+* **Preprint PDF:** Included in this repository as [`paper_ssrn_clean.pdf`](paper_ssrn_clean.pdf)
 
-results = run_stochastic_dispatch(
-    pv_capacity_mw=10.0,
-    bess_capacity_mwh=20.0,
-    bess_power_mw=5.0,
-    cvar_weight=0.50,
-    alpha=0.95
-)
+---
 
-print(f"Optimal Expected Profit: {results['expected_profit']:.2f} EUR")
-print(f"CVaR (95% Tail Risk):     {results['cvar']:.2f} EUR")
-print(f"BESS Cycling (EFC):       {results['efc_used']:.2f} Cycles")
-📚 Citation
-Code snippet
+## 📚 Citation
+
+```bibtex
 @article{refaei2026stochastic,
   title={Stochastic MILP Optimization for Co-Located PV-BESS Assets: Managing Imbalance Tail Risks via CVaR and Piecewise Degradation in the German Power Market},
   author={Refaei, Mohammadreza},
@@ -126,11 +96,3 @@ Code snippet
   doi={10.2139/ssrn.7345918},
   url={[https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918)}
 }
-👤 Author Contact
-Mohammadreza (Max) Refaei
-
-Institution: SRH Berlin University of Applied Sciences
-
-ORCID: 0009-0007-7867-0599
-
-Email: maxrefaei@proton.me
