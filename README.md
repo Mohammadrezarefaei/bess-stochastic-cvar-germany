@@ -93,8 +93,18 @@ Backtested over historical generation profiles and real price series from the Ge
 git clone [https://github.com/Mohammadrezarefaei/bess-stochastic-cvar-germany.git](https://github.com/Mohammadrezarefaei/bess-stochastic-cvar-germany.git)
 cd bess-stochastic-cvar-germany
 pip install -r requirements.txt
-Institution: SRH Berlin University of Applied Sciences
+2. Execute Optimization
+Python
+from src.pipeline import run_stochastic_dispatch
 
-ORCID: 0009-0007-7867-0599
+results = run_stochastic_dispatch(
+    pv_capacity_mw=10.0,
+    bess_capacity_mwh=20.0,
+    bess_power_mw=5.0,
+    cvar_weight=0.50,
+    alpha=0.95
+)
 
-Email: maxrefaei@proton.me
+print(f"Optimal Expected Profit: {results['expected_profit']:.2f} EUR")
+print(f"CVaR (95% Tail Risk):     {results['cvar']:.2f} EUR")
+print(f"BESS Cycling (EFC):       {results['efc_used']:.2f} Cycles")
