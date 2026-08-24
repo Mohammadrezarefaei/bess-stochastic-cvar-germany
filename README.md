@@ -16,6 +16,15 @@ Where expected scenario profit and tail-risk metrics are defined as:
 $$\text{Profit}_s = \sum_{t=1}^T \left[ \lambda_t^{\text{DA}} P_t^{\text{DA}} \Delta t + \lambda_{t,s}^{\text{imb}} P_{t,s}^{\text{imb}} \Delta t - \sum_{k=1}^K C_k^{\text{deg}} e_{t,k}^{\text{dis}} \right]$$
 
 $$\text{CVaR}_\alpha = \zeta - \frac{1}{1 - \alpha} \sum_{s=1}^S \pi_s z_s$$
+## 📊 Empirical Results (German SMARD Market Data)
+
+![Optimization Results](./bess_simulation_chart.png)
+
+| Strategy Architecture | Risk Parameter ($\beta$) | Degradation Model | Performance & Warranty Outcome |
+| :--- | :--- | :--- | :--- |
+| **Strategy A: Aggressive (Risk-Neutral)** | $\beta = 0.0$ | Ignored ($C_k = 0$) | Rapid warranty burn, micro-cycling |
+| **Strategy B: Conservative P10** | $\beta = 0.0$ | Flat Penalty | Heavy solar curtailment, suppressed PnL |
+| **Strategy C: Proposed Model** | $\beta = 0.35$ | Piecewise Linear | **Optimal risk-adjusted PnL, warranty strictly preserved** |
 
 ### 2. Physical & Warranty Constraints
 * **Imbalance Definition:** $P_{t,s}^{\text{imb}} = (P_t^{\text{PV}} + P_t^{\text{dis}} - P_t^{\text{ch}}) - P_t^{\text{DA}}$
