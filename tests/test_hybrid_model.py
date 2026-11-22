@@ -1,0 +1,29 @@
+import numpy as np
+from hybrid_bess_optimization import HybridBESSModel
+
+
+def _cfg(T=16, S=3, beta=0.2):
+    rng = np.random.default_rng(0)
+    lda = np.where(np.arange(T) < T // 2, 30.0, 120.0)
+    lim = lda + rng.normal(0, 10, (S, T))
+    pv = np.where(np.arange(T) < T // 2, 5.0, 0.0)
+    return dict(p_pv=pv, lambda_da=lda, lambda_imb=lim,
+                pi_s=[1.0 / S] * S, beta=beta)
+
+
+def test_model_builds_and_solves():
+    res = HybridBESSModel(_cfg()).solve()
+    assert np.isfinite(res["expected_pnl"])
+
+
+def test_soc_within_bounds():
+    res = HybridBESSModel(_cfg()).solve()
+    soc = np.array(res["soc"])
+    assert (soc >= 1.0 - 1e-6).all()
+    assert (soc <= 9.0 + 1e-6).all()
+
+
+def test_no_simultaneous_charge_discharge():
+    res = HybridBESSModel(_cfg()).solve()
+    prod = np.array(res["p_ch"]) * np.array(res["p_dis"])
+    assert (prod < 1e-6).all()
