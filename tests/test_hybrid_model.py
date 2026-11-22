@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from hybrid_bess_optimization import HybridBESSModel
 
 
@@ -46,3 +47,19 @@ def test_default_imbalance_band_is_respected():
     res = HybridBESSModel(cfg).solve()
     gap = np.abs(np.array(res["p_da"]) - _phys(cfg, res))
     assert (gap <= 1.0 + 1e-6).all()
+
+
+def test_negative_imbalance_limit_is_rejected():
+    cfg = _cfg()
+    cfg["max_imbalance_mw"] = -0.1
+
+    with pytest.raises(ValueError, match="finite and non-negative"):
+        HybridBESSModel(cfg)
+
+
+def test_non_finite_imbalance_limit_is_rejected():
+    cfg = _cfg()
+    cfg["max_imbalance_mw"] = np.inf
+
+    with pytest.raises(ValueError, match="finite and non-negative"):
+        HybridBESSModel(cfg)
