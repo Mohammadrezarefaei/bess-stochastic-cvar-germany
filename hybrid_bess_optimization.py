@@ -73,7 +73,7 @@ class HybridBESSModel:
         m.profit_def = pyo.Constraint(m.S, rule=profit_scenario_rule)
 
         m.cvar_loss = pyo.Constraint(m.S, rule=lambda model, s: model.z[s] >= model.zeta - model.profit_s[s])
-        exp_profit = sum(self.pi_s[s] * model.profit_s[s] for s in m.S)
+        exp_profit = sum(self.pi_s[s] * m.profit_s[s] for s in m.S)
         cvar = m.zeta - (1.0 / (1.0 - self.alpha_cvar)) * sum(self.pi_s[s] * m.z[s] for s in m.S)
         m.obj = pyo.Objective(expr=(1 - self.beta) * exp_profit + self.beta * cvar, sense=pyo.maximize)
         return m
