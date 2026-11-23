@@ -19,9 +19,9 @@
 
 Co-located Solar Photovoltaic (PV) and Battery Energy Storage Systems (BESS) face acute financial exposure in deregulated wholesale power markets due to high forecast uncertainty and volatile real-time imbalance settlement mechanisms (such as the German **reBAP** single/dual-pricing framework). 
 
-This paper proposes a **Two-Stage Stochastic Mixed-Integer Linear Programming (MILP)** model that optimizes day-ahead market commitments while mitigating:
-* **Physical Asset Degradation:** Utilizing a piecewise linear depth-of-discharge (DoD) penalty constrained by Equivalent Full Cycle (EFC) warranty ceilings.
-* **Financial Tail Risk:** Incorporating **Conditional Value-at-Risk ($\text{CVaR}_\alpha$)** at $\alpha = 0.95$ to protect cash flows against extreme imbalance settlement penalties.
+This repository implements a **single-stage, scenario-based mixed-integer linear program (MILP) with a CVaR term** for the day-ahead nomination of a co-located PV-BESS plant. All battery decisions are here-and-now: scenarios enter only through the imbalance price, there are no recourse decisions, and PV generation is deterministic. The model addresses:
+* **Degradation cost:** piecewise-linear segments are defined, but with the default parameters only the first segment is reachable, so the cost is effectively a flat EUR/MWh on discharged energy. It is not a depth-of-discharge model. A cap on discharged energy per rated energy (EFC) is enforced.
+* **Financial tail risk:** $\text{CVaR}_\alpha$ at $\alpha = 0.95$ on scenario profit. With few equiprobable scenarios (for example 5) this equals the worst scenario.
 
 ---
 
@@ -30,7 +30,7 @@ This paper proposes a **Two-Stage Stochastic Mixed-Integer Linear Programming (M
 ### 1. Objective Function
 The multi-objective function maximizes expected net revenue across all scenarios $\omega \in \Omega$ weighted by probabilities $\pi_\omega$, while penalizing battery degradation and managing tail risk through $\text{CVaR}_\alpha$:
 
-$$\max_{\Xi} \sum_{t=1}^T \lambda_t^{\text{DA}} P_t^{\text{DA}} \Delta t + \sum_{\omega \in \Omega} \pi_\omega \left[ \sum_{t=1}^T \left( \lambda_{t,\omega}^{\text{imb}} \Delta P_{t,\omega} - C_{\text{deg}}(P_{t,\omega}^{\text{ch}}, P_{t,\omega}^{\text{dis}}) \right) \Delta t \right] + \beta \left( \zeta - \frac{1}{1-\alpha} \sum_{\omega \in \Omega} \pi_\omega z_\omega \right)$$
+$$\max \; (1-\beta)\left[\sum_{t=1}^T \lambda_t^{\text{DA}} P_t^{\text{DA}} \Delta t + \sum_{\omega \in \Omega} \pi_\omega \sum_{t=1}^T \lambda_{t,\omega}^{\text{imb}} \Delta P_{t,\omega} \Delta t - C_{\text{deg}}\right] + \beta \left( \zeta - \frac{1}{1-\alpha} \sum_{\omega \in \Omega} \pi_\omega z_\omega \right)$$
 
 Where:
 * $P_t^{\text{DA}}$: First-stage Day-Ahead nomination (MW)
@@ -40,6 +40,7 @@ Where:
 * $\zeta$: Value-at-Risk threshold ($\text{VaR}_\alpha$)
 * $z_\omega$: Scenario tail loss auxiliary shortfall variable ($z_\omega \ge 0$)
 * $\beta \in [0, 1]$: Risk-aversion tuning parameter
+* $|\Delta P_{t,\omega}| \le \Delta_{\max}$: bound on imbalance volume (`max_imbalance_mw`, default 1.0 MW, a placeholder to be calibrated to PV forecast error)
 
 ---
 
@@ -57,25 +58,30 @@ $$\text{CVaR}_\alpha = \zeta - \frac{1}{1-\alpha} \sum_{\omega \in \Omega} \pi_\
 
 ### 3. Piecewise Linear Battery Degradation
 
-$$C_{\text{deg}}(P_{t,\omega}^{\text{ch}}, P_{t,\omega}^{\text{dis}}) = \sum_{k=1}^K c_k \cdot \delta_{t,\omega,k}$$
+$$C_{\text{deg}} = \sum_{t=1}^T \sum_{k=1}^K c_k \cdot \delta_{t,k}$$
 
-$$P_{t,\omega}^{\text{dis}} \Delta t = \sum_{k=1}^K \delta_{t,\omega,k}, \quad 0 \le \delta_{t,\omega,k} \le \overline{\Delta}_k$$
+$$P_{t}^{\text{dis}} \Delta t = \sum_{k=1}^K \delta_{t,k}, \quad 0 \le \delta_{t,k} \le \overline{\Delta}_k$$
 
-$$\sum_{t=1}^T \frac{P_{t,\omega}^{\text{ch}} \eta_{\text{ch}} + P_{t,\omega}^{\text{dis}} / \eta_{\text{dis}}}{2 \cdot E_{\text{rated}}} \Delta t \le \text{EFC}_{\max}$$
+$$\sum_{t=1}^T \frac{P_{t}^{\text{dis}} \Delta t}{E_{\text{rated}}} \le \text{EFC}_{\max}$$
 
 ---
 
-## 📊 Benchmark & Performance Metrics
+## Status and limitations
 
-Backtested over empirical generation profiles and market data from the German Federal Network Agency (**SMARD / Bundesnetzagentur**):
-
-| Dispatch Strategy | Expected Daily Profit (€) | 5% Worst-Case CVaR (€) | Daily EFC Usage | Risk Reduction |
-| :--- | :---: | :---: | :---: | :---: |
-| **Deterministic (No Risk Metric)** | 14,820.50 | -2,140.20 | 2.15 | Baseline |
-| **Stochastic MILP ($\beta = 0.0$)** | 14,210.80 | -850.40 | 1.62 | +60.2% |
-| **Risk-Averse Stochastic ($\beta = 0.5$)** | **13,940.10** | **+1,220.60** | **1.28** | **+157.0%** |
-| **Conservative Hedged ($\beta = 1.0$)** | 13,100.40 | +2,450.00 | 0.94 | +214.5% |
-
+* **Single-stage:** all battery variables (charge, discharge, SoC) and the day-ahead nomination are
+  first-stage decisions. Only the imbalance price is scenario-dependent; there is no recourse.
+* **Imbalance volume is bounded** by `max_imbalance_mw` (default 1.0 MW, a placeholder that must be
+  calibrated to PV forecast error). Without such a bound the day-ahead nomination became a free
+  speculative position unrelated to physical delivery.
+* **Synthetic data:** day-ahead and imbalance prices in the notebook are synthetic. Real data in this
+  repository is limited to one PV day and 11 days of day-ahead prices that do not overlap (see
+  `DATA_SOURCES.md`). No imbalance-price (reBAP) data are used yet.
+* **Few scenarios:** the examples use 5 scenarios, so CVaR at 95 % equals the worst scenario.
+* **No benchmark table:** an earlier table of profit and CVaR figures was removed because it could not
+  be reproduced from this repository.
+* **Tests:** `python -m pytest tests/` runs model and data-integrity tests. There is no CI yet.
+* **Working paper:** the PDF below was written before these corrections and still describes a
+  two-stage model and empirical backtesting. Treat it as superseded until it is revised.
 ---
 
 ## 📄 Working Paper & Full-Text
@@ -89,7 +95,7 @@ Title: Stochastic MILP Optimization for Co-Located PV-BESS Assets: Managing Imba
 
 Author: Mohammadreza Refaei
 
-Journal: SSRN Electronic Journal (2026)
+Venue: SSRN preprint (2026), not peer-reviewed
 
 SSRN ID: 7345918
 
@@ -97,12 +103,6 @@ Link: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7345918
 
 Author Contact
 Mohammadreza (Max) Refaei
-
-Institution: SRH Berlin University of Applied Sciences
-
-ORCID: 0009-0007-7867-0599
-
-Email: maxrefaei@proton.me
 
 Institution: SRH Berlin University of Applied Sciences
 
