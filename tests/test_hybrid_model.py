@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from hybrid_bess_optimization import HybridBESSModel
 
 
@@ -27,3 +28,38 @@ def test_no_simultaneous_charge_discharge():
     res = HybridBESSModel(_cfg()).solve()
     prod = np.array(res["p_ch"]) * np.array(res["p_dis"])
     assert (prod < 1e-6).all()
+
+
+def _phys(cfg, res):
+    return cfg["p_pv"] + np.array(res["p_dis"]) - np.array(res["p_ch"])
+
+
+def test_zero_imbalance_means_nomination_equals_physical_position():
+    cfg = _cfg()
+    cfg["max_imbalance_mw"] = 0.0
+    res = HybridBESSModel(cfg).solve()
+    gap = np.abs(np.array(res["p_da"]) - _phys(cfg, res))
+    assert (gap < 1e-6).all()
+
+
+def test_default_imbalance_band_is_respected():
+    cfg = _cfg()
+    res = HybridBESSModel(cfg).solve()
+    gap = np.abs(np.array(res["p_da"]) - _phys(cfg, res))
+    assert (gap <= 1.0 + 1e-6).all()
+
+
+def test_negative_imbalance_limit_is_rejected():
+    cfg = _cfg()
+    cfg["max_imbalance_mw"] = -0.1
+
+    with pytest.raises(ValueError, match="finite and non-negative"):
+        HybridBESSModel(cfg)
+
+
+def test_non_finite_imbalance_limit_is_rejected():
+    cfg = _cfg()
+    cfg["max_imbalance_mw"] = np.inf
+
+    with pytest.raises(ValueError, match="finite and non-negative"):
+        HybridBESSModel(cfg)

@@ -15,6 +15,9 @@ class HybridBESSModel:
         self.S = len(self.pi_s)
 
         self.p_grid_max = config.get("p_grid_max", 10.0)
+        self.max_imb = float(config.get("max_imbalance_mw", 1.0))
+        if not np.isfinite(self.max_imb) or self.max_imb < 0:
+            raise ValueError("max_imbalance_mw must be finite and non-negative")
         self.e_nom = config.get("e_nom", 10.0)
         self.p_ch_max = config.get("p_ch_max", 5.0)
         self.p_dis_max = config.get("p_dis_max", 5.0)
@@ -45,7 +48,7 @@ class HybridBESSModel:
         m.e_seg = pyo.Var(m.T, m.K, bounds=(0, None))
 
         m.p_grid = pyo.Var(m.T, m.S, bounds=(0, self.p_grid_max))
-        m.p_imb = pyo.Var(m.T, m.S, bounds=(-self.p_grid_max, self.p_grid_max))
+        m.p_imb = pyo.Var(m.T, m.S, bounds=(-self.max_imb, self.max_imb))
         m.profit_s = pyo.Var(m.S)
         m.zeta = pyo.Var()
         m.z = pyo.Var(m.S, bounds=(0, None))
