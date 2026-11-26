@@ -1,4 +1,4 @@
-scenario_id,step,block_id,source_timestamp_utc,da_price_eur_mwh,pv_forecast_mwh_15min,pv_actual_mwh_15min,pv_error_mwh_15min,scenario_weight,pv_actual_national_mw,pv_forecast_national_mw,p_pv_mw,p_pv_forecast_mw
+scenario_id,step,block_id,source_da_timestamp,da_price_eur_mwh,pv_forecast_mwh_15min,pv_actual_mwh_15min,pv_error_mwh_15min,scenario_weight,pv_actual_national_mw,pv_forecast_national_mw,p_pv_mw,p_pv_forecast_mw
 0,0,0,2026-08-18T17:00:00,138.26,0.0,0.009380639947580717,0.009380639947580717,0.01,0.0,0.0,0.03752255979032287,0.0
 0,1,0,2026-08-18T17:15:00,150.66,0.0,0.011757058954890175,0.011757058954890175,0.01,0.0,0.0,0.0470282358195607,0.0
 0,2,0,2026-08-18T17:30:00,160.5,0.0,0.0,0.0,0.01,0.0,0.0,0.0,0.0

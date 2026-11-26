@@ -1,7 +1,8 @@
-"""Generate exploratory joint scenarios from the repository's available data.
+"""Generate explicitly synthetic exploratory scenario paths.
 
-No PV forecast-error or local-plant data are available.  This module creates
-an explicitly synthetic proxy and is not suitable for commercial validation.
+DA-price blocks and the repeated one-day PV proxy are sampled/generated
+separately. No empirical joint dependence, PV forecast error, or local-plant
+production data are available.
 """
 
 from __future__ import annotations
@@ -31,12 +32,9 @@ def load_da_prices(path: Path = DA_FILE) -> pd.DataFrame:
 
 def load_pv_proxy(path: Path = PV_FILE) -> pd.DataFrame:
     df = pd.read_csv(path, parse_dates=["timestamp"])
-    return df.rename(
-        columns={
-            "timestamp": "source_timestamp_utc",
-            "p_pv_mw": "p_pv_forecast_mw",
-        }
-    )[["source_timestamp_utc", "pv_national_mw", "p_pv_forecast_mw"]]
+    return df.rename(columns={"p_pv_mw": "p_pv_forecast_mw"})[
+        ["timestamp", "pv_national_mw", "p_pv_forecast_mw"]
+    ]
 
 
 def generate_scenarios(
@@ -84,7 +82,7 @@ def generate_scenarios(
                     "scenario_id": scenario_id,
                     "step": step,
                     "block_id": step // block_length,
-                    "source_timestamp_utc": da.iloc[da_idx]["timestamp"].isoformat(),
+                    "source_da_timestamp": da.iloc[da_idx]["timestamp"].isoformat(),
                     "da_price_eur_mwh": float(
                         da.iloc[da_idx]["da_price_eur_mwh"]
                     ),
