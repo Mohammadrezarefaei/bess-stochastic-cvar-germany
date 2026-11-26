@@ -77,6 +77,10 @@ $$\sum_{t=1}^T \frac{P_{t}^{\text{dis}} \Delta t}{E_{\text{rated}}} \le \text{EF
   repository is limited to one PV day and 11 days of day-ahead prices that do not overlap (see
   `DATA_SOURCES.md`). No imbalance-price (reBAP) data are used yet.
 * **Few scenarios:** the examples use 5 scenarios, so CVaR at 95 % equals the worst scenario.
+* **P2 diagnostic MVP:** `ScenarioDependentBESSModel` adds scenario-dependent PV, battery
+  operation, curtailment, grid delivery and profit with explicit weighted lower-tail CVaR.
+  Its P2 experiments use the DA price as a temporary imbalance-price proxy and perfect-foresight
+  recourse. They are diagnostic only; no real reBAP series or local PV forecast is used.
 * **No benchmark table:** an earlier table of profit and CVaR figures was removed because it could not
   be reproduced from this repository.
 * **Tests:** `python -m pytest tests/` runs model and data-integrity tests. There is no CI yet.
