@@ -1,3 +1,5 @@
+> HISTORICAL: This assessment describes an earlier implementation. See [Phase 2.1 Closure](PHASE_2_1_CLOSURE.md) for the current pipeline, results and limitations.
+
 # P2 Research MVP Audit
 
 **Audit baseline:** branch `feat/p2-research-mvp`, commit `8fba833`

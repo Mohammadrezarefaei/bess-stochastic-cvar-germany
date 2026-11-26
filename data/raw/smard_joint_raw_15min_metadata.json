@@ -1,0 +1,31 @@
+{
+  "source": "SMARD / Bundesnetzagentur",
+  "api_base": "https://www.smard.de/app/chart_data",
+  "resolution": "quarterhour",
+  "period_start_local": "2025-10-01T00:00:00+02:00",
+  "retrieved_at_utc": "2026-11-26T15:58:51.886346+00:00",
+  "filters": {
+    "da_price_raw": {
+      "filter": 4169,
+      "region": "DE-LU"
+    },
+    "pv_actual_raw": {
+      "filter": 4068,
+      "region": "DE"
+    },
+    "pv_forecast_raw": {
+      "filter": 125,
+      "region": "DE"
+    }
+  },
+  "common_chunks_downloaded": 61,
+  "row_count": 40488,
+  "missing_values": {
+    "da_price_raw": 96,
+    "pv_actual_raw": 2,
+    "pv_forecast_raw": 0
+  },
+  "units": "Not yet independently verified; raw API values retained.",
+  "timestamp_timezone": "UTC, with Europe/Berlin conversion column",
+  "csv_file": "data/raw/smard_joint_raw_15min_2025-10-01_latest.csv"
+}

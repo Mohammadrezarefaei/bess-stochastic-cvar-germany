@@ -3,6 +3,25 @@ import pandas as pd
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
 
+
+def _extract_best_objective_bound(problem_info, objective_sense):
+    """Extract the dual bound from Pyomo legacy SolverResults."""
+    if problem_info is None:
+        return None
+
+    attribute = (
+        "upper_bound"
+        if objective_sense == pyo.maximize
+        else "lower_bound"
+    )
+    raw_bound = getattr(problem_info, attribute, None)
+
+    try:
+        return float(pyo.value(raw_bound))
+    except (TypeError, ValueError):
+        return None
+
+
 class HybridBESSModel:
     def __init__(self, config: dict):
         self.dt = config.get("dt", 0.25)
@@ -187,7 +206,11 @@ class ScenarioDependentBESSModel:
         self.e_deg_cap = np.asarray(
             config.get(
                 "e_deg_cap",
-                [0.4 * self.e_nom, 0.4 * self.e_nom, 0.2 * self.e_nom],
+                [
+                    0.4 * self.e_nom * self.efc_max,
+                    0.4 * self.e_nom * self.efc_max,
+                    0.2 * self.e_nom * self.efc_max,
+                ],
             ),
             dtype=float,
         )
@@ -256,9 +279,10 @@ class ScenarioDependentBESSModel:
                 == model.p_dis[t, s] * self.dt,
         )
         m.deg_cap = pyo.Constraint(
-            m.T, m.S, m.K,
-            rule=lambda model, t, s, k:
-                model.e_seg[t, s, k] <= self.e_deg_cap[k],
+            m.S, m.K,
+            rule=lambda model, s, k:
+                sum(model.e_seg[t, s, k] for t in model.T)
+                <= self.e_deg_cap[k],
         )
         m.efc_limit = pyo.Constraint(
             m.S,
@@ -325,18 +349,89 @@ class ScenarioDependentBESSModel:
         return m
 
     def solve(self, solver_name: str = "appsi_highs"):
+        import time
+
         model = self.build_model()
         solver = pyo.SolverFactory(solver_name)
+
         if not solver.available(exception_flag=False):
             raise RuntimeError(f"Solver '{solver_name}' is not available")
-        results = solver.solve(model)
+
+        print("Starting solver:", solver_name, flush=True)
+        start_time = time.perf_counter()
+
+        results = solver.solve(
+            model,
+            tee=True,
+            load_solutions=False,
+            options={
+                "time_limit": 120,
+                "random_seed": 42,
+                "threads": 1,
+                "mip_rel_gap": 0.05,
+            },
+        )
+
+        solve_time = time.perf_counter() - start_time
+        termination = results.solver.termination_condition
+        solution_count = len(results.solution)
+
+        print("Termination:", termination, flush=True)
+        print("Available solutions:", solution_count, flush=True)
+
+        if solution_count == 0:
+            raise RuntimeError(
+                f"No feasible solution found. Termination={termination}"
+            )
+
+        model.solutions.load_from(results)
+
+        objective_value = float(pyo.value(model.obj))
+
+        if termination == pyo.TerminationCondition.optimal:
+            classification = "optimal"
+        elif termination == pyo.TerminationCondition.maxTimeLimit:
+            classification = "time_limit_feasible"
+        else:
+            classification = "feasible_nonoptimal"
+
+        problem_info = results.problem[0] if len(results.problem) else None
+        best_bound = _extract_best_objective_bound(
+            problem_info, model.obj.sense
+        )
+
+        mip_gap = (
+            abs(best_bound - objective_value)
+            / max(abs(objective_value), 1e-10)
+            if best_bound is not None
+            else None
+        )
+
+        solver_info = results.solver
+        reported_time_raw = solver_info.get("Wallclock time", solve_time)
+
+        try:
+            reported_time = float(pyo.value(reported_time_raw))
+        except (TypeError, ValueError):
+            reported_time = solve_time
+
+        print("Result classification:", classification, flush=True)
+        print("Loaded objective:", objective_value, flush=True)
+        print("Best objective bound:", best_bound, flush=True)
+        print(
+            "MIP gap (%):",
+            None if mip_gap is None else mip_gap * 100,
+            flush=True,
+        )
 
         scenario_profit = [
             float(pyo.value(model.profit_s[s])) for s in model.S
         ]
+
         expected_profit = float(
             sum(self.pi_s[s] * scenario_profit[s] for s in range(self.S))
         )
+
         cvar = float(pyo.value(model.zeta)) - (
             1.0 / (1.0 - self.alpha_cvar)
         ) * float(sum(
@@ -344,8 +439,14 @@ class ScenarioDependentBESSModel:
         ))
 
         return {
-            "termination_condition": str(results.solver.termination_condition),
-            "solve_time": float(getattr(results.solver, "time", 0.0) or 0.0),
+            "termination_condition": str(termination),
+            "result_classification": classification,
+            "solver_status": str(solver_info.status),
+            "solve_time": reported_time if reported_time > 0 else float(solve_time),
+            "best_feasible_objective": objective_value,
+            "best_objective_bound": best_bound,
+            "mip_gap": mip_gap,
+            "mip_gap_pct": None if mip_gap is None else mip_gap * 100,
             "p_da": [float(pyo.value(model.p_da[t])) for t in model.T],
             "p_ch": [
                 [float(pyo.value(model.p_ch[t, s])) for t in model.T]
@@ -374,7 +475,7 @@ class ScenarioDependentBESSModel:
             "scenario_profit": scenario_profit,
             "expected_pnl": expected_profit,
             "cvar": cvar,
-            "objective": float(pyo.value(model.obj)),
+            "objective": objective_value,
             "zeta": float(pyo.value(model.zeta)),
             "z": [float(pyo.value(model.z[s])) for s in model.S],
             "independent_weighted_cvar": weighted_lower_tail_cvar(

@@ -1,3 +1,5 @@
+<!-- HISTORICAL CONTENT: parts of this document describe an earlier implementation. The current Phase 2.1 implementation, results and limitations are documented in docs/PHASE_2_1_CLOSURE.md. -->
+
 <div align="center">
 
 # Stochastic MILP Optimization for Co-Located PV-BESS Assets

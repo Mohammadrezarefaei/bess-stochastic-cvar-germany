@@ -22,7 +22,7 @@ def p2_config(n_scenarios=3, n_steps=16):
         "alpha_cvar": 0.95,
         "beta": 0.20,
         "c_curtail_eur_mwh": 5.0,
-        "max_imbalance_mw": 1.0,
+        "max_imbalance_mw": 10.0,
     }
 
 

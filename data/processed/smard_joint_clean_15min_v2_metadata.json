@@ -1,0 +1,13 @@
+{
+  "source": "Bundesnetzagentur / SMARD",
+  "input_file": "data/processed/smard_joint_clean_15min_v1.csv",
+  "output_file": "data/processed/smard_joint_clean_15min_v2.csv",
+  "pv_actual_raw_unit": "MWh per 15-minute interval",
+  "pv_forecast_raw_unit": "MWh per 15-minute interval",
+  "pv_conversion": "MW = MWh_per_15min * 4",
+  "price_unit": "EUR/MWh",
+  "error_definition": "PV actual MW - PV day-ahead forecast MW",
+  "rows": 40390,
+  "train_cutoff_local": "2026-08-01T00:00:00+02:00",
+  "missing_data_policy": "No imputation; inherited from v1"
+}

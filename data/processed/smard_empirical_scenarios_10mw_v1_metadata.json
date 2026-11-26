@@ -1,0 +1,28 @@
+{
+  "source": "Bundesnetzagentur / SMARD",
+  "input_file": "data/processed/smard_joint_clean_15min_v2.csv",
+  "output_file": "data/processed/smard_empirical_scenarios_10mw_v1.csv",
+  "method": "Joint moving-block bootstrap",
+  "training_cutoff_local": "2026-08-01T00:00:00+02:00",
+  "training_cutoff_utc": "2026-07-31T22:00:00+00:00",
+  "training_rows": 29184,
+  "n_scenarios": 100,
+  "horizon_steps": 96,
+  "block_length": 96,
+  "interval_minutes": 15,
+  "seed": 42,
+  "scenario_weight": 0.01,
+  "pv_proxy_capacity_mw": 10.0,
+  "national_pv_peak_training_mw": 57845.92,
+  "pv_normalization_factor": 0.00017287303927398856,
+  "pv_actual_definition": "SMARD national actual PV scaled by common factor",
+  "pv_forecast_definition": "SMARD national day-ahead PV forecast scaled by common factor",
+  "pv_error_definition": "actual minus forecast",
+  "sampling": "Price, PV actual and PV forecast are sampled jointly from the same historical timestamps. Blocks do not cross missing timestamp gaps.",
+  "limitations": [
+    "National PV forecast errors are not local plant forecast errors.",
+    "The 10 MW series is a peak-normalized national proxy.",
+    "The model's imbalance price assumption remains a separate limitation.",
+    "The scenario model does not by itself establish out-of-sample performance."
+  ]
+}

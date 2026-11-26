@@ -1,3 +1,5 @@
+> HISTORICAL: This assessment describes an earlier implementation. See [Phase 2.1 Closure](PHASE_2_1_CLOSURE.md) for the current pipeline, results and limitations.
+
 # P2.1 Data and Scenario Integrity Assessment
 
 **Branch/baseline:** `feat/p2-research-mvp`, baseline commit `8fba833`
