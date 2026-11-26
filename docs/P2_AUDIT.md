@@ -1,7 +1,7 @@
 # P2 Research MVP Audit
 
-**Audit baseline:** branch `feat/p2-research-mvp`, commit `8fba833`  
-**Baseline validation:** `python -m pytest -q` — 22 passed before audit tests were added.  
+**Audit baseline:** branch `feat/p2-research-mvp`, commit `8fba833`
+**Baseline validation:** `python -m pytest -q` — 22 passed before audit tests were added.
 **Scope:** scenario generation and data provenance, P2 economics and physics, CVaR, input validation, and solve-result handling. No production model changes are included in this audit.
 
 ## Executive assessment

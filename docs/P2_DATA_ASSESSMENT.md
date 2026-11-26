@@ -1,6 +1,6 @@
 # P2.1 Data and Scenario Integrity Assessment
 
-**Branch/baseline:** `feat/p2-research-mvp`, baseline commit `8fba833`  
+**Branch/baseline:** `feat/p2-research-mvp`, baseline commit `8fba833`
 **Assessment scope:** the named DA source CSV, the named PV profile CSV, the processed scenario CSV, and JSON files matching `data/processed/*.json` other than the inventory itself. The machine-readable inventory is [`data/processed/data_inventory.json`](../data/processed/data_inventory.json). This is a focused inventory, not recursive discovery of every possible file under `data/`; its exact scope is also recorded in the JSON.
 
 ## Decision
